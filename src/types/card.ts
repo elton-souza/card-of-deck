@@ -1,5 +1,8 @@
 export interface CardList {
-  results: CardBase[];
+  results: {
+    name: string;
+    url: string;
+  }[];
 }
 
 export interface CardBase {
@@ -8,18 +11,25 @@ export interface CardBase {
   points: number;
 }
 export interface CardInfo extends CardBase {
-  sprites:{
+  sprites: {
     front_default: string;
-    other:{
+    other: {
       dream_world: {
         front_default: string;
-      },
-    }
-  }
+      };
+    };
+  };
   types: {
     slot: number;
     type: {
       name: string;
+    };
+  }[];
+  descriptions: {
+    description: string;
+    language: {
+      name: string;
+      url: string;
     };
   }[];
 }
