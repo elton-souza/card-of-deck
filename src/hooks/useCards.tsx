@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCardInfo, getCardList } from "../services/api";
+import { getCardFeature, getCardInfo, getCardList } from "../services/api";
 import { CardInfo } from "../types/card";
 
 export function useCards() {
@@ -13,12 +13,15 @@ export function useCards() {
     const { data } = await getCardList();
 
     data.results.map(async (poke) => {
-      const { data } = await getCardInfo(poke.name);
+      const pokemonBase = await getCardInfo(poke.name);
+      const pokemonFeature = await getCardFeature(pokemonBase.data.id)
+      
       setCards((state) => [
         ...state,
         {
-          ...data,
+          ...pokemonBase.data,
           points: Math.floor(Math.random() * 10),
+          descriptions: pokemonFeature.data.descriptions
         },
       ]);
     });
