@@ -15,3 +15,5 @@ export const getCardList = async (): Promise<AxiosResponse<CardList>> =>
 export const getCardInfo = async (
   name: string
 ): Promise<AxiosResponse<CardInfo>> => api.get(`pokemon/${name}`);
+
+export const getCardCharacteristic = async (id: any) => api.get(`characteristic/${id}/`)
