@@ -1,15 +1,65 @@
 import { useContext, useEffect, useState } from "react";
 import { Cards } from "../components/Cards";
 import { UserContext } from "../context/userContext";
-import { useCards } from "../hooks/useCards";
+import { getCardFeature, getCardInfo, getCardList } from "../services/api";
+import { CardInfo } from "../types/card";
 export function DeckCards() {
   const { user, logout } = useContext(UserContext);
+  const [cards, setCards] = useState<CardInfo[]>([]);
+  const [handCards, setHandCards] = useState<CardInfo[]>([]);
+  const [pickCards, setPickCards] = useState<CardInfo[]>([]);
+  const recoveredCards = JSON.parse(localStorage.getItem("cards")!!);
 
-  const { handCards, addCards, shuffleCards, pickCards } = useCards();
+  const createListCards = async () => {
+    const { data } = await getCardList();
+
+    data.results.map(async (poke) => {
+      const pokemonBase = await getCardInfo(poke.name);
+      const pokemonFeature = await getCardFeature(pokemonBase.data.id)
+      
+      setCards((state) => [
+        ...state,
+        {
+          ...pokemonBase.data,
+          points: Math.floor(Math.random() * 10),
+          descriptions: pokemonFeature.data.descriptions
+        },
+      ]);
+    });
+  };
+
+  const shuffleCards = () => {
+    setHandCards([...handCards].sort(() => Math.random() - 0.5));
+  };
+
+  const addCards = () => {
+    setHandCards((state) => [...state, pickCards[0]]);
+    setPickCards((state) => [...state].slice(1));
+  };
+
+  const createStartHand = () => {
+    setHandCards(cards.slice(0, 5));
+    setPickCards(cards.slice(5, 8));
+  };
+
+  useEffect(() => {
+    if (recoveredCards) {
+      setCards(recoveredCards);
+    } else {
+      createListCards();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cards.length === 8) {
+      localStorage.setItem("cards", JSON.stringify(cards));
+      createStartHand();
+    }
+  }, [cards]);
 
   return (
-    <main className="w-full min-h-screen bg-primary flex flex-col items-center">
-      <div className="max-w-[1280px] w-full mt-[10px] flex flex-col gap-12">
+    <main className="w-full min-h-screen bg-primary flex flex-col items-center p-5">
+      <div className="max-w-[1280px] w-full flex flex-col gap-12">
         <header className="mt-3 flex justify-end lg:justify-center gap-3 lg:flex-col lg:items-center">
           <span className="bg-secondary w-[80px] lg:w-[130px] p-3 text-center rounded text-white font-bold">
             {user}
